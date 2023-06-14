@@ -22,6 +22,7 @@ class BTCV2DSliceDataset(Dataset):
         preprocess: 用于预处理读入的数据;
         transform: __getitem__中调用。用于(可能的)数据增强。
         """
+        super(BTCV2DSliceDataset, self).__init__()
         self.transform = transform
 
         with open(json_file, 'r') as f:
