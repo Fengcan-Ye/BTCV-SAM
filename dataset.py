@@ -75,5 +75,18 @@ def cvt2uint8(images : np.ndarray):
 
     return images
 
+def remove_pure_background(images, labels):
+    # images shape: [N, H, W]
+    # labels shape: [N, H, W]
+    # output shape: images: [M, H, W]
+    #               labels: [M, H, W]
+    label_sum = np.sum(labels, axis=(1,2))
+    selection = label_sum > 0
+    return images[selection], labels[selection]
+
 def to_uint8_rgb(images, labels):
+    # images shape: [N, H, W]
+    # labels shape: [N, H, W]
+    # output shape: images [N, H, W, 3]
+    #               labels [N, H, W]
     return gray2rgb(cvt2uint8(images)), np.array(labels, dtype=np.uint8)
