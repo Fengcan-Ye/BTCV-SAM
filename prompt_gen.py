@@ -13,10 +13,10 @@ def single_point_prompt(labels : torch.Tensor):
     input_labels: [dict of organid : torch.Tensor[N, 1]]
     """
 
-    pass
+    raise NotImplementedError 
 
 def multi_point_prompt(labels : torch.Tensor):
-    pass
+    raise NotImplementedError
 
 def box_prompt(labels : torch.Tensor, device=None):
     """
