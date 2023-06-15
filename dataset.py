@@ -70,6 +70,7 @@ class BTCV2DSlicePromptDataset(BTCV2DSliceDataset):
         json_file: json文件路径。json文件中应当包含训练/测试数据集具体划分方式;
         type: 字符串。"training" 或 "validation";
         preprocess: 用于预处理读入的数据;
+        prompt_prob: 四种prompt(单点、两点、三点、box)出现的概率
         该数据集不支持数据增强
         """
         super(BTCV2DSlicePromptDataset, self).__init__(root_dir, json_file, type, preprocess)
@@ -81,7 +82,6 @@ class BTCV2DSlicePromptDataset(BTCV2DSliceDataset):
 
         self.prompts = [self.single_point_prompts, self.two_point_prompts, 
                         self.three_point_prompts,  self.box_prompts]
-        
         self.cum_p = torch.cumsum(prompt_prob)
     
     def __getitem__(self, idx):
