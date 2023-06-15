@@ -63,7 +63,7 @@ class BTCV2DSliceDataset(Dataset):
         return sample
     
 class BTCV2DSlicePromptDataset(BTCV2DSliceDataset):
-    def __init__(self, root_dir, json_file, type, preprocess=None):
+    def __init__(self, root_dir, json_file, type, preprocess=None, prompt_prob = [1/3, 1/6, 1/6, 1/3]):
         """
         参数：
         root_dir:  数据所在的根目录;
@@ -74,15 +74,21 @@ class BTCV2DSlicePromptDataset(BTCV2DSliceDataset):
         """
         super(BTCV2DSlicePromptDataset, self).__init__(root_dir, json_file, type, preprocess)
 
-        self.point_prompts = single_point_prompt(self.labels)
-        self.multi_point_prompts = multi_point_prompt(self.labels)
+        self.single_point_prompts = point_prompt(self.labels)
+        self.two_point_prompts = point_prompt(self.labels, 2)
+        self.three_point_prompts = point_prompt(self.labels, 3)
         self.box_prompts = box_prompt(self.labels)
 
-        self.prompts = [self.point_prompts, self.multi_point_prompts, self.box_prompts]
+        self.prompts = [self.single_point_prompts, self.two_point_prompts, 
+                        self.three_point_prompts,  self.box_prompts]
+        
+        self.cum_p = torch.cumsum(prompt_prob)
     
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
+
+        
         
 
         
