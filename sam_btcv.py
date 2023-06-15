@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from segment_anything.modeling.sam import Sam
+from typing import Any, Dict, List, Tuple
 
 class SamBTCV(Sam):
     def __init__(self, sam : Sam):
@@ -15,9 +16,9 @@ class SamBTCV(Sam):
 
     def forward(
         self,
-        batched_input,
+        batched_input: List[Dict[str, Any]],
         multimask_output: bool,
-    ):
+    ) -> List[Dict[str, torch.Tensor]]:
         """
         Predicts masks end-to-end from provided images and prompts.
         If prompts are not known in advance, using SamPredictor is
