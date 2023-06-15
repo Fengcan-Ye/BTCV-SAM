@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+@torch.no_grad()
 def dice(pred_mask, gt_mask):
     """
       参数：
@@ -13,6 +14,7 @@ def dice(pred_mask, gt_mask):
     intersect = torch.sum(torch.logical_and(pred_mask, gt_mask), dim=(1, 2))
     return 2 * intersect / (torch.sum(pred_mask, dim=(1, 2)) + torch.sum(gt_mask, dim=(1, 2)))
 
+@torch.no_grad()
 def IoU(pred_mask, gt_mask):
     """
       参数：
