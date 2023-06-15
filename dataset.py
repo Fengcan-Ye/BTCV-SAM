@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils 
+from prompt_gen import *
 
 import warnings 
 warnings.filterwarnings('ignore') 
@@ -60,6 +61,32 @@ class BTCV2DSliceDataset(Dataset):
             sample = self.transform(sample)
         
         return sample
+    
+class BTCV2DSlicePromptDataset(BTCV2DSliceDataset):
+    def __init__(self, root_dir, json_file, type, preprocess=None):
+        """
+        参数：
+        root_dir:  数据所在的根目录;
+        json_file: json文件路径。json文件中应当包含训练/测试数据集具体划分方式;
+        type: 字符串。"training" 或 "validation";
+        preprocess: 用于预处理读入的数据;
+        该数据集不支持数据增强
+        """
+        super(BTCV2DSlicePromptDataset, self).__init__(root_dir, json_file, type, preprocess)
+
+        self.point_prompts = single_point_prompt(self.labels)
+        self.multi_point_prompts = multi_point_prompt(self.labels)
+        self.box_prompts = box_prompt(self.labels)
+
+        self.prompts = [self.point_prompts, self.multi_point_prompts, self.box_prompts]
+    
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+        
+
+        
+
 
 def gray2rgb(images : np.ndarray):
     # images shape: [N, H, W]
@@ -91,3 +118,6 @@ def to_uint8_rgb(images, labels):
     # output shape: images [N, H, W, 3]
     #               labels [N, H, W]
     return gray2rgb(cvt2uint8(images)), np.array(labels, dtype=np.uint8)
+
+def to_tensor(images, labels):
+    return torch.tensor(images), torch.tensor(labels)
