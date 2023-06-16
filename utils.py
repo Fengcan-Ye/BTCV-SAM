@@ -32,16 +32,16 @@ def prepare_image(image, transform, device):
     return image.permute(2, 0, 1).contiguous()
 
 
-def batched_input_gen(images, prompts, types, sam):
+def batched_input_gen(images, prompts, types, sam,point_labels):
     """
     参数：
     images:  torch.Tensor [B, H, W, 3] 
     prompts: list of dictionaries of length B
              for box prompts: organ_id -> torch.Tensor[xmin, ymin, xmax, ymax]
-             for single point prompts:
-             for multipoint prompts:  
+             for point prompts:torch.Tensor [N,2]
     types:   list of strings indicating prompt types 
              each string can be 'box' or 'point'
+    point_labels: torch.Tensor Batched labels for point prompts [N],0 for bg , 1 for fg
     返回：
     batched_input: list of dictionaries with keys 
              'image', 'original size', 'point_coords', 'point_labels', 'boxes'
@@ -58,9 +58,12 @@ def batched_input_gen(images, prompts, types, sam):
             bboxes = prompts[img_idx] # dict of organ_id -> bbox 
             input['boxes'] = resize_transform.apply_boxes_torch(torch.vstack(list(bboxes.values())), 
                                                                                  input['original_size'])
-        else:
-            # point prompt not implemented
-            raise NotImplementedError
+        elif types[img_idx] == 'point':
+            points=prompts[img_idx]
+            input['point_coords']=resize_transform.apply_coords_torch(points,input['original_size'])
+            input['point_labels']=point_labels[img_idx]
+
+
 
         
         batched_input.append(input)
