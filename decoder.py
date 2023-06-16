@@ -46,7 +46,7 @@ class Decoder(MaskDecoder):
                                       activation=activation, 
                                       iou_head_depth=iou_head_depth, 
                                       iou_head_hidden_dim=iou_head_hidden_dim)
-        
+        self.n_classes = n_classes
         self.cls_token = nn.Embedding(1, transformer_dim)
         self.cls_prediction_head = MLP(
             transformer_dim, cls_head_hidden_dim, self.num_mask_tokens * n_classes, cls_head_depth
@@ -91,7 +91,7 @@ class Decoder(MaskDecoder):
             mask_slice = slice(0, 1)
         masks = masks[:, mask_slice, :, :]
         iou_pred = iou_pred[:, mask_slice]
-        cls_pred = cls_pred[:, mask_slice].view(iou_pred.shape[0], -1, iou_pred.shape[1])
+        cls_pred = cls_pred[:, mask_slice, :]
 
         # Prepare output
         return masks, iou_pred, cls_pred
@@ -133,7 +133,7 @@ class Decoder(MaskDecoder):
 
         # Generate mask quality predictions
         iou_pred = self.iou_prediction_head(iou_token_out)
-        cls_pred = self.cls_prediction_head(cls_token_out)
+        cls_pred = self.cls_prediction_head(cls_token_out).view(b, -1, self.n_classes)
 
         return masks, iou_pred, cls_pred
 
