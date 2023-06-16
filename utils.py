@@ -62,6 +62,8 @@ def batched_input_gen(images, prompts, types, sam,point_labels):
             points=prompts[img_idx]
             input['point_coords']=resize_transform.apply_coords_torch(points,input['original_size'])
             input['point_labels']=point_labels[img_idx]
+        else:
+            raise NotImplementedError
 
 
 
