@@ -73,7 +73,7 @@ def train_one_epoch(train_set : Dataset,
         dice_loss = torch.mean(torch.stack(dice_losses))
 
         total_loss = mse_loss + 20 * focal_loss + dice_loss
-        print('total_loss:', total_loss)
+        print('total_loss:', total_loss.item())
         total_loss.backward()
         optimizer.step()
 
