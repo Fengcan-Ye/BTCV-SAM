@@ -86,7 +86,11 @@ def train_one_epoch(train_set : Dataset,
         cross_entropy_loss = torch.mean(torch.stack(cross_entropy_losses)) if model.requires_classification else 0
 
         total_loss = mse_loss + 20 * focal_loss + dice_loss + cross_entropy_loss
-        print('total_loss:', total_loss.item())
+        print('mse loss:', mse_loss.item(), flush=True)
+        print('focal loss:', focal_loss.item(), flush=True)
+        print('dice loss:', dice_loss.item(), flush=True)
+        print('cross entropy loss:', cross_entropy_loss.item(), flush=True)
+        print('total loss:', total_loss.item(), flush=True)
         total_loss.backward()
         optimizer.step()
 
@@ -102,7 +106,7 @@ def train_model(train_set : Dataset,
                 batch_size : int = 32, 
                 n_epochs : int = 50
                 ):
-    best_valid_loss = 10000
+    best_valid_loss = 100000
 
     for epoch in range(n_epochs):
         print('Training Epoch', epoch, flush=True)
@@ -111,6 +115,7 @@ def train_model(train_set : Dataset,
         lr_scheduler.step()
 
         valid_loss = validation_loss(validation_set, model)
+        print('Validation Loss:', valid_loss, flush=True)
 
         if valid_loss < best_valid_loss:
             best_valid_loss = valid_loss
