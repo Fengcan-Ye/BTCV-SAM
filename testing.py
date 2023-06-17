@@ -5,6 +5,7 @@ import tqdm
 from utils import batched_input_gen
 from segment_anything.modeling.sam import Sam
 
+@torch.no_grad()
 def test_model(validation_loader : DataLoader,
                prompt_generate,  # function (labels, device) -> prompt (list of dictionaries)
                prompt_type : str,
@@ -15,7 +16,7 @@ def test_model(validation_loader : DataLoader,
     # Dice = 2 * intersect / total mask pixels 
     # mDice = Average Dice over all categories
 
-    for batched_data in tqdm.tqdm(validation_loader):
+    for batched_data in validation_loader:
         images, labels = batched_data['image'], batched_data['label'] # labels transferred to mps will cause strange errors
         batch_size = images.shape[0]
         prompts = prompt_generate(labels, device=sam.device)
@@ -43,3 +44,4 @@ def test_model(validation_loader : DataLoader,
     mDice = np.mean(list(dice.values()))
 
     return dice, mDice
+

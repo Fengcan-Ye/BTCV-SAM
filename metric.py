@@ -38,7 +38,6 @@ def DiceLoss(inputs, targets, smooth = 1):
     返回：
       dice loss
     """
-
     inputs = F.sigmoid(inputs)
 
     inputs = inputs.view(-1)
