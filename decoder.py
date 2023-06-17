@@ -8,13 +8,7 @@ from typing import List, Tuple, Type
 class Decoder(MaskDecoder):
     def __init__(
         self,
-        *,
-        transformer_dim: int,
-        transformer: nn.Module,
-        num_multimask_outputs: int = 3,
-        activation: Type[nn.Module] = nn.GELU,
-        iou_head_depth: int = 3,
-        iou_head_hidden_dim: int = 256,
+        mask_decoder : MaskDecoder,
         cls_head_depth: int = 3, 
         cls_head_hidden_dim: int = 256,
         n_classes: int = 14,
@@ -40,16 +34,24 @@ class Decoder(MaskDecoder):
             used to predict mask class
           n_classes (int): number of classes
         """
-        super(Decoder, self).__init__(transformer_dim=transformer_dim, 
-                                      transformer=transformer, 
-                                      num_multimask_outputs=num_multimask_outputs, 
-                                      activation=activation, 
-                                      iou_head_depth=iou_head_depth, 
-                                      iou_head_hidden_dim=iou_head_hidden_dim)
+        self.transformer_dim = mask_decoder.transformer_dim
+        self.transformer = mask_decoder.transformer 
+
+        self.num_multimask_outputs = mask_decoder.num_multimask_outputs
+
+        self.iou_token = mask_decoder.iou_token
+        self.num_mask_tokens = mask_decoder.num_multimask_outputs
+        self.mask_tokens = mask_decoder.mask_tokens
+
+        self.output_upscaling = mask_decoder.output_upscaling
+        self.output_hypernetworks_mlps = mask_decoder.output_hypernetworks_mlps
+
+        self.iou_prediction_head = mask_decoder.iou_prediction_head
+
         self.n_classes = n_classes
-        self.cls_token = nn.Embedding(1, transformer_dim)
+        self.cls_token = nn.Embedding(1, self.transformer_dim)
         self.cls_prediction_head = MLP(
-            transformer_dim, cls_head_hidden_dim, self.num_mask_tokens * n_classes, cls_head_depth
+            self.transformer_dim, cls_head_hidden_dim, self.num_mask_tokens * n_classes, cls_head_depth
         )
 
     
