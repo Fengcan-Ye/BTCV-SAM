@@ -107,10 +107,8 @@ def train_model(train_set : Dataset,
     for epoch in range(n_epochs):
         print('Training Epoch', epoch, flush=True)
 
-        model.train()
         train_one_epoch(train_set, optimizer, model, batch_size)
         lr_scheduler.step()
-        model.eval()
 
         valid_loss = validation_loss(validation_set, model)
 
