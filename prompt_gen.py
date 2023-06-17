@@ -33,7 +33,7 @@ def point_prompt(labels : torch.Tensor, n_points=1, device=None):
                 while len(selected) < n_points:
                     randint = torch.randint(0, n_pixels, (1,)).item()
 
-                    if randint not in selected:
+                    if n_pixels < n_points or randint not in selected:
                         selected.append(randint)
 
                 xs = segmentation[1][selected]
