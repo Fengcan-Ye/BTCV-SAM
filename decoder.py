@@ -50,11 +50,13 @@ class Decoder(nn.Module):
 
         self.iou_prediction_head = mask_decoder.iou_prediction_head
 
+        device = self.iou_token.weight.device
+
         self.n_classes = n_classes
-        self.cls_token = nn.Embedding(1, self.transformer_dim)
+        self.cls_token = nn.Embedding(1, self.transformer_dim, device=device)
         self.cls_prediction_head = MLP(
             self.transformer_dim, cls_head_hidden_dim, self.num_mask_tokens * n_classes, cls_head_depth
-        )
+        ).to(device)
 
     
     def forward(
