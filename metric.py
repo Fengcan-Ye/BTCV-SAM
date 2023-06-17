@@ -28,50 +28,44 @@ def IoU(pred_mask, gt_mask):
 
     return intersect / union
 
-class DiceLoss(nn.Module):
-    def __init__(self):
-        super(DiceLoss, self).__init__()
 
-    def forward(self, inputs, targets, smooth = 1):
-        """
-        参数：
-          inputs: torch.Tensor[B, H, W] predicted logits
-          targets: torch.Tensor[B, H, W] ground truth binary masks
-          smooth: float
-        返回：
-          dice loss
-        """
+def DiceLoss(inputs, targets, smooth = 1):
+    """
+    参数：
+      inputs: torch.Tensor[B, H, W] predicted logits
+      targets: torch.Tensor[B, H, W] ground truth binary masks
+      smooth: float
+    返回：
+      dice loss
+    """
 
-        inputs = F.sigmoid(inputs)
+    inputs = F.sigmoid(inputs)
 
-        inputs = inputs.view(-1)
-        targets = targets.view(-1)
+    inputs = inputs.view(-1)
+    targets = targets.view(-1)
 
-        intersection = (inputs * targets).sum()
-        dice = (2 * intersection + smooth) / (inputs.sum() + targets.sum() + smooth)
+    intersection = (inputs * targets).sum()
+    dice = (2 * intersection + smooth) / (inputs.sum() + targets.sum() + smooth)
 
-        return 1 - dice
+    return 1 - dice
     
 
-class FocalLoss(nn.Module):
-    def __init__(self):
-        super(FocalLoss, self).__init__()
     
-    def forward(self, inputs, targets, alpha=0.8, gamma=2):
-        """
-        参数：
-          inputs: torch.Tensor[B, H, W] predicted logits
-          targets: torch.Tensor[B, H, W] ground truth binary masks
-          alpha: float
-          gamma: float
-        返回：
-          focal loss
-        """
-        inputs = inputs.view(-1)
-        targets = targets.view(-1)
+def FocalLoss(inputs, targets, alpha=0.8, gamma=2):
+    """
+    参数：
+      inputs: torch.Tensor[B, H, W] predicted logits
+      targets: torch.Tensor[B, H, W] ground truth binary masks
+      alpha: float
+      gamma: float
+    返回：
+      focal loss
+    """
+    inputs = inputs.view(-1)
+    targets = targets.view(-1)
 
-        BCE = F.binary_cross_entropy_with_logits(inputs, targets, reduction='mean')
-        BCE_EXP = torch.exp(-BCE)
-        focal_loss = alpha * (1 - BCE_EXP) ** gamma * BCE 
+    BCE = F.binary_cross_entropy_with_logits(inputs, targets, reduction='mean')
+    BCE_EXP = torch.exp(-BCE)
+    focal_loss = alpha * (1 - BCE_EXP) ** gamma * BCE 
 
-        return focal_loss
+    return focal_loss
