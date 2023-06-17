@@ -82,17 +82,28 @@ class BTCV2DSlicePromptDataset(BTCV2DSliceDataset):
 
         self.prompts = [self.single_point_prompts, self.two_point_prompts, 
                         self.three_point_prompts,  self.box_prompts]
+        self.prompt_types = ['point'] * 3 + ['box']
         self.cum_p = torch.cumsum(prompt_prob)
     
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        
-        
+        prompt_index = np.sum(self.cum_p < np.random.uniform(0, 1, 1))  # randomly choose a prompt
+        prompt_type = self.prompt_types[prompt_index]
+
+        image = self.images[idx]
+        prompt = self.prompts[prompt_index][idx]  # dict organ_id -> prompt
+        prompt = dict(list(prompt.items())[np.random.randint(0, len(prompt))])
+        label = self.labels[idx]
+
+        return {'image' : image, 
+                'label' : label, 
+                'prompt' : prompt, 
+                'type' : prompt_type}
 
         
-
+        
 
 def gray2rgb(images : np.ndarray):
     # images shape: [N, H, W]
