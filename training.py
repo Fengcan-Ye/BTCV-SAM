@@ -120,4 +120,5 @@ def train_model(train_set : Dataset,
         if valid_loss < best_valid_loss:
             best_valid_loss = valid_loss
             torch.save(model.state_dict(), os.path.join(best_model_root, 'best_model.pth'))
-        
+            
+        torch.save(model.state_dict(), os.path.join(best_model_root, 'latest.pth'))
