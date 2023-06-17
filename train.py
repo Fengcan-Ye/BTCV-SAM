@@ -13,6 +13,8 @@ parser.add_argument('--weight_decay', type=float, default=0.0)
 parser.add_argument('--batch_size', type=int, default=16)
 parser.add_argument('--n_epochs', type=int, default=30)
 parser.add_argument('--best_model_root', type=str, default='./')
+parser.add_argument('--lr_step_size', type=int, default=5)
+parser.add_argument('--lr_decay_frac', type=float, default=0.7)
 parser.add_argument('--classification', action='store_true')
 
 args = parser.parse_args()
@@ -43,7 +45,8 @@ def main():
     # Fine-tune SAM on BTCV Dataset
     model = SamBTCV(sam, requires_classification=args.classification)
     optimizer = AdamW(model.mask_decoder.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=args.weight_decay)
-    train_model(train_set, validation_set, optimizer, None, model, best_model_root=args.best_model_root, 
+    exp_lr_scheduler = lr_scheduler.StepLR(optimizer, args.lr_step_size, args.lr_decay_frac)
+    train_model(train_set, validation_set, optimizer, exp_lr_scheduler, model, best_model_root=args.best_model_root, 
                 batch_size=args.batch_size, n_epochs=args.n_epochs)
 
 if __name__ == '__main__':
