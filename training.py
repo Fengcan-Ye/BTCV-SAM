@@ -102,7 +102,7 @@ def train_model(train_set : Dataset,
                 batch_size : int = 32, 
                 n_epochs : int = 50
                 ):
-    best_mDice = 0
+    best_valid_loss = 10000
 
     for epoch in range(n_epochs):
         print('Training Epoch', epoch, flush=True)
@@ -112,13 +112,9 @@ def train_model(train_set : Dataset,
         lr_scheduler.step()
         model.eval()
 
-        validation_loader = DataLoader(validation_set, batch_size=1, shuffle=False)
-        _, mDice_p = test_model(validation_loader, lambda labels, device: point_prompt(labels, 1, device), 'point', model)
-        _, mDice_b = test_model(validation_loader, lambda labels, device: box_prompt(labels, device), 'box', model)
+        valid_loss = validation_loss(validation_set, model)
 
-        mean_dice = (mDice_p + mDice_b) / 2
-
-        if mean_dice > best_mDice:
-            best_mDice = mean_dice
+        if valid_loss < best_valid_loss:
+            best_valid_loss = valid_loss
             torch.save(model.state_dict(), os.path.join(best_model_root, 'best_model.pth'))
         
