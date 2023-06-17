@@ -32,7 +32,7 @@ def prepare_image(image, transform, device):
     return image.permute(2, 0, 1).contiguous()
 
 
-def batched_input_gen(images, prompts, types, sam,point_labels):
+def batched_input_gen(images, prompts, types, sam, point_labels=None):
     """
     参数：
     images:  torch.Tensor [B, H, W, 3] 
