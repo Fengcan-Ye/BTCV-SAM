@@ -1,18 +1,25 @@
 import torch
 import torch.nn as nn
 from segment_anything.modeling.sam import Sam
+from decoder import Decoder
 from typing import Any, Dict, List, Tuple
 
 class SamBTCV(Sam):
-    def __init__(self, sam : Sam):
+    def __init__(self, sam : Sam, requires_classification=False, n_classes=14):
         super(SamBTCV, self).__init__(sam.image_encoder, sam.prompt_encoder, sam.mask_decoder, 
                                       sam.pixel_mean, sam.pixel_std)
+        
+        self.requires_classification = requires_classification
         
         for param in self.image_encoder.parameters():
             param.requires_grad = False 
         
         for param in self.prompt_encoder.parameters():
             param.requires_grad = False
+        
+        if requires_classification:
+            self.mask_decoder = Decoder(mask_decoder = sam.mask_decoder, 
+                              n_classes = n_classes)
 
     def forward(
         self,
@@ -71,13 +78,20 @@ class SamBTCV(Sam):
                 boxes=image_record.get("boxes", None),
                 masks=image_record.get("mask_inputs", None),
             )
-            low_res_masks, iou_predictions = self.mask_decoder(
+            
+            predictions = self.mask_decoder(
                 image_embeddings=curr_embedding.unsqueeze(0),
                 image_pe=self.prompt_encoder.get_dense_pe(),
                 sparse_prompt_embeddings=sparse_embeddings,
                 dense_prompt_embeddings=dense_embeddings,
                 multimask_output=multimask_output,
             )
+
+            if self.requires_classification:
+                low_res_masks, iou_predictions, cls_predictions = predictions 
+            else:
+                low_res_masks, iou_predictions = predictions
+            
             masks = self.postprocess_masks(
                 low_res_masks,
                 input_size=image_record["image"].shape[-2:],
@@ -91,4 +105,8 @@ class SamBTCV(Sam):
                     "low_res_logits": low_res_masks,
                 }
             )
+
+            if self.requires_classification:
+                outputs[-1]["class_predictions"] = cls_predictions
+                
         return outputs
