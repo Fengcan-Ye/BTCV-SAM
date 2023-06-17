@@ -42,7 +42,7 @@ class Decoder(nn.Module):
         self.num_multimask_outputs = mask_decoder.num_multimask_outputs
 
         self.iou_token = mask_decoder.iou_token
-        self.num_mask_tokens = mask_decoder.num_multimask_outputs
+        self.num_mask_tokens = mask_decoder.num_mask_tokens
         self.mask_tokens = mask_decoder.mask_tokens
 
         self.output_upscaling = mask_decoder.output_upscaling
