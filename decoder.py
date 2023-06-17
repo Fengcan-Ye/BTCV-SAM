@@ -3,9 +3,9 @@ from torch import nn
 from torch.nn import functional as F
 from segment_anything.modeling.mask_decoder import MaskDecoder, MLP
 
-from typing import List, Tuple, Type
+from typing import List, Tuple
 
-class Decoder(MaskDecoder):
+class Decoder(nn.Module):
     def __init__(
         self,
         mask_decoder : MaskDecoder,
@@ -34,6 +34,8 @@ class Decoder(MaskDecoder):
             used to predict mask class
           n_classes (int): number of classes
         """
+        super(Decoder, self).__init__()
+
         self.transformer_dim = mask_decoder.transformer_dim
         self.transformer = mask_decoder.transformer 
 
