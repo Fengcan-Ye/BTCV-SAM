@@ -105,18 +105,37 @@ def train_model(train_set : Dataset,
                 model : SamBTCV,
                 best_model_root : str = './', 
                 batch_size : int = 32, 
-                n_epochs : int = 50
+                n_epochs : int = 50,
+                adaptive : bool = False
                 ):
     best_valid_loss = 100000
+    p_prompts = [1/3, 1/6, 1/6, 1/3]
+    epsilon = 0.01
 
     for epoch in range(n_epochs):
         print('Training Epoch', epoch, flush=True)
 
-        train_one_epoch(train_set, optimizer, model, batch_size)
+        train_one_epoch(train_set, optimizer, model, batch_size, p_prompts)
         lr_scheduler.step()
 
         valid_loss = validation_loss(validation_set, model)
         print('Validation Loss:', valid_loss, flush=True)
+
+        if adaptive:
+            validation_loader = DataLoader(validation_set, batch_size=1, shuffle=False)
+            _, mDice_1 = test_model(validation_loader, lambda labels, device: point_prompt(labels, 1, device), 'point', model)
+            _, mDice_2 = test_model(validation_loader, lambda labels, device: point_prompt(labels, 2, device), 'point', model)
+            _, mDice_3 = test_model(validation_loader, lambda labels, device: point_prompt(labels, 3, device), 'point', model)
+            _, mDice_b = test_model(validation_loader, lambda labels, device: box_prompt(labels, device), 'box', model)
+
+            r_1 = 1 / (mDice_1 + epsilon)
+            r_2 = 1 / (mDice_2 + epsilon)
+            r_3 = 1 / (mDice_3 + epsilon)
+            r_b = 1 / (mDice_b + epsilon)
+
+            p_prompts = np.array([r_b, r_2, r_3, r_1])
+            p_prompts = p_prompts / p_prompts.sum()
+
 
         if valid_loss < best_valid_loss:
             best_valid_loss = valid_loss

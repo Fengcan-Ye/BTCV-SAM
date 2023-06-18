@@ -16,6 +16,7 @@ parser.add_argument('--best_model_root', type=str, default='./')
 parser.add_argument('--lr_step_size', type=int, default=5)
 parser.add_argument('--lr_decay_frac', type=float, default=0.7)
 parser.add_argument('--classification', action='store_true')
+parser.add_argument('--adaptive', action='store_true')
 
 args = parser.parse_args()
 
@@ -47,7 +48,7 @@ def main():
     optimizer = AdamW(model.mask_decoder.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=args.weight_decay)
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer, args.lr_step_size, args.lr_decay_frac)
     train_model(train_set, validation_set, optimizer, exp_lr_scheduler, model, best_model_root=args.best_model_root, 
-                batch_size=args.batch_size, n_epochs=args.n_epochs)
+                batch_size=args.batch_size, n_epochs=args.n_epochs, adaptive=args.adaptive)
 
 if __name__ == '__main__':
     main()
