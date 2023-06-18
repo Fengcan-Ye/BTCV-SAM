@@ -83,7 +83,8 @@ def train_one_epoch(train_set : Dataset,
         mse_loss = torch.mean(torch.stack(mse_losses))
         focal_loss = torch.mean(torch.stack(focal_losses))
         dice_loss = torch.mean(torch.stack(dice_losses))
-        cross_entropy_loss = torch.mean(torch.stack(cross_entropy_losses)) if model.requires_classification else 0
+        cross_entropy_loss = torch.mean(torch.stack(cross_entropy_losses)) if model.requires_classification \
+                                                                           else torch.tensor([0], device=device)
 
         total_loss = mse_loss + 20 * focal_loss + dice_loss + cross_entropy_loss
         print('mse loss:', mse_loss.item(), flush=True)
